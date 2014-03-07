@@ -73,7 +73,7 @@ BEGIN
       -- hold reset state for 100 ns.
       --wait for 100 ns;	
 		
-		report "Start of the simulation test";
+		report "Start of the MOORE simulation test";
 		
       --wait for clk_period*2;
 
