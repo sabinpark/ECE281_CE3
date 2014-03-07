@@ -117,6 +117,11 @@ Then I updated the process *floor_state_machine* to only take care of reseting t
 For the output logic, I kept *floor* the same as the moore.  For *nextfloor*, I set the logic so that *nextfloor* would be set to the appropriate floors depending on the the state, *floor*, and the input, *up_down*.
 
 ```vhdl
+	floor <= "0001" when (floor_state = floor1) else
+		"0010" when (floor_state = floor2) else
+		"0011" when (floor_state = floor3) else
+		"0100" when (floor_state = floor4) else
+		"0001";
 	nextfloor <= "0001" when (floor_state = floor1 and up_down='0') else
 		 "0010" when (floor_state = floor1 and up_down='1') else
 		 "0001" when (floor_state = floor2 and up_down='0') else
@@ -127,6 +132,7 @@ For the output logic, I kept *floor* the same as the moore.  For *nextfloor*, I 
 		 "0100" when (floor_state = floor4 and up_down='1') else
 		 "0001";
 ```
+
 
 ## Mealy Testbench
 The testbench was also very similar to the MOORE testbench.  The biggest difference was that I had to account for the signal, *nextfloor*.  Again, since the code was essentially, the same, I was able to reuse the assert statements.  Fortunately, the console did not print out any errors.  This showed that the design funcioned as it was supposed to.  Furthermore, I doublechecked the results manually, and the results were correct.
@@ -163,3 +169,5 @@ A: yes, because the mealy takes in both current state and current inputs, while 
 
 # Documentation:
 Testbench: Cadet Bodin pointed out that it would be simpler for now to check each floor value with the expected value manually instead of using a for loop.  He also helped me with the testbench by pointing out that nextfloor should be an *INOUT* instead of *OUT*.  This got rid of my errors and allowed the simulation to run successfully.
+
+Mealy Shell:  Cadet Wooden helped me by pointing out that I needed another signal, *next_floor_state* to drive the state of the program as well.  He told me the usefulness of separating the mealy process into two different processes.
