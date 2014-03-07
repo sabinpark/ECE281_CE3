@@ -116,16 +116,24 @@ The testbench was also very similar to the MOORE testbench.  The biggest differe
 # Questions/Answers
 All of the questions were answered within the code.  However, I will add the questions and answers here as well.
 
+### Q1
 Q: is reset synchronous or asynchronous?
+
 A: synchronous because it is dependent on the clock
 
+### Q2
 Q: if up_down is set to "go up" and stop is set to "don't stop" which floor do we want to go to?
+
 A: if you're on floors 1, 2, or 3, then go one floor up; if you're on floor 4, remain on floor 4
 
+### Q3
 Q: if up_down is set to "go down" and stop is set to "don't stop" which floor do we want to go to?
+
 A: if you're on floors 2, 3, or 4, then go one floor down; if you're on floor 1, remain on floor 1
 
+### Q4
 Q: will the Mealy machine be different from the Moore machine?
+
 A: yes, because the mealy takes in both current state and current inputs, while the moore takes in current states only
 
 
