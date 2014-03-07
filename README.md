@@ -107,8 +107,32 @@ One thing I had to accomodate was to make nextfloor into an *INOUT* instead of a
 
 Other than what was mentioned above, the code for the MEALY was very similar to the MOORE.
 
+##*UPDATE*
+I changed the mealy shell in several ways.  First, I created another signal called *next_floor_state*, which would account for the next floor.
+
+The made the process *next_state_machine* to set the state of *next_floor_state* depending on the values of *up_down* and *stop*.  This takes care of the mealy characteristic of the inputs also driving the outputs.
+
+Then I updated the process *floor_state_machine* to only take care of reseting the floor to floor 1 when there is a rising edge.
+
+For the output logic, I kept *floor* the same as the moore.  For *nextfloor*, I set the logic so that *nextfloor* would be set to the appropriate floors depending on the the state, *floor*, and the input, *up_down*.
+
+```vhdl
+	nextfloor <= "0001" when (floor_state = floor1 and up_down='0') else
+		 "0010" when (floor_state = floor1 and up_down='1') else
+		 "0001" when (floor_state = floor2 and up_down='0') else
+		 "0011" when (floor_state = floor2 and up_down='1') else
+		 "0010" when (floor_state = floor3 and up_down='0') else
+		 "0100" when (floor_state = floor3 and up_down='1') else
+		 "0011" when (floor_state = floor4 and up_down='0') else
+		 "0100" when (floor_state = floor4 and up_down='1') else
+		 "0001";
+```
+
 ## Mealy Testbench
 The testbench was also very similar to the MOORE testbench.  The biggest difference was that I had to account for the signal, *nextfloor*.  Again, since the code was essentially, the same, I was able to reuse the assert statements.  Fortunately, the console did not print out any errors.  This showed that the design funcioned as it was supposed to.  Furthermore, I doublechecked the results manually, and the results were correct.
+
+### Update
+I changed the testbench to account for the next floor as well.
 
 ### Simulation Results
 ![alt text](https://raw.github.com/sabinpark/ECE281_CE3/master/Mealy_Simulation_Results.PNG "Mealy Testbench Simulation Results")
