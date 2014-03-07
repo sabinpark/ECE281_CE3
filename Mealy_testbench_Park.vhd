@@ -28,7 +28,7 @@ ARCHITECTURE behavior OF Mealy_testbench_Park IS
          stop : IN  std_logic;
          up_down : IN  std_logic;
          floor : OUT  std_logic_vector(3 downto 0);
-         nextfloor : INOUT  std_logic_vector(3 downto 0)
+         nextfloor : OUT  std_logic_vector(3 downto 0)
         );
     END COMPONENT;
     
@@ -82,15 +82,19 @@ BEGIN
 		reset <= '1';
 		wait for clk_period*2;
 		assert (floor = "0001")
-				report "Floor 1 expected"
+				report "[expected: floor = floor 1]"
 		severity error;
 		reset <= '0';
 		
 		up_down <= '1';
 		
 		-- Floor 1 to Floor 2
+		wait for clk_period/2;
 		stop <= '0';
-		wait for clk_period;
+		assert (floor = "0001" and nextfloor = "0010")
+				report "[expected: floor = floor 1; nextfloor = floor 2]"
+		severity error;
+		wait for clk_period/2;
 		stop <= '1';
 		assert (floor = "0010")
 				report "Floor 2 expected"

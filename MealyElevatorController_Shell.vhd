@@ -35,14 +35,15 @@ entity MealyElevatorController_Shell is
            stop 		: in  STD_LOGIC;
            up_down 	: in  STD_LOGIC;
            floor 		: out STD_LOGIC_VECTOR (3 downto 0);
-			  nextfloor : inout std_logic_vector (3 downto 0));
+			  nextfloor : out std_logic_vector (3 downto 0));
 end MealyElevatorController_Shell;
 
 architecture Behavioral of MealyElevatorController_Shell is
 
 type floor_state_type is (floor1, floor2, floor3, floor4);
 
-signal floor_state : floor_state_type;
+-- added next_floor_state signal
+signal floor_state, next_floor_state : floor_state_type;
 
 begin
 
@@ -51,78 +52,92 @@ begin
 --Question: Will it be different from your Moore Machine?
 --Answer: Yes
 ---------------------------------------------------------
-floor_state_machine: process(clk, stop)
+next_state_machine: process(up_down, stop, floor_state)
 begin
 --Insert your state machine below:
 	-- this is gonna be asynchronous
+		
 	
-	-- going to go back to floor 1
-	if reset='1' then
-			floor_state <= floor1;
-	end if;
-	
-	-- on the rising edge and not stopping
-	if rising_edge(clk) and stop='0' then  
-			case floor_state is
-				--when our current state is floor1
-				when floor1 =>
-					--if up_down is set to "go up" we want to go to floor2
-					if (up_down='1') then 
-						floor_state <= floor2;
-					--otherwise we're going to stay at floor1
-					else
-						floor_state <= floor1;
-					end if;
-				--when our current state is floor2
-				when floor2 => 
-					--if up_down is set to "go up" we want to go to floor3
-					if (up_down='1') then 
-						floor_state <= floor3; 			
-					--if up_down is set to "go down" we want to go to floor1
-					elsif (up_down='0' and stop='0') then 
-						floor_state <= floor1;
-					--otherwise we're going to stay at floor2
-					else
-						floor_state <= floor2;
-					end if;
-				--when our current state is floor3
-				when floor3 =>
-					--if up_down is set to "go up" we want to go to floor4
-					if (up_down='1' and stop ='0') then 
-						floor_state <= floor4;
-					--if up_down is set to "go down" we want to go to floor2
-					elsif (up_down='0' and stop='0') then 
-						floor_state <= floor2;
-					--otherwise stat at floor3
-					else
-						floor_state <= floor3;
-					end if;
-				--when our current state is floor4
-				when floor4 =>
-					--if up_down is set to "go down" we want to go floor3
-					if (up_down='0' and stop='0') then 
-						floor_state <= floor3;
-					--otherwise remain at floor4
-					else 
-						floor_state <= floor4;	
-					end if;
-				
-				--This line accounts for phantom states
-				when others =>
-					floor_state <= floor1;
-			end case;
+	case floor_state is
+		--when our current state is floor1
+		when floor1 =>
+			--if up_down is set to "go up" we want to go to floor2
+			if (up_down='1' and stop = '0') then 
+				next_floor_state <= floor2;
+			--otherwise we're going to stay at floor1
+			else
+				next_floor_state <= floor1;
+			end if;
+		--when our current state is floor2
+		when floor2 => 
+			--if up_down is set to "go up" we want to go to floor3
+			if (up_down='1' and stop='0') then 
+				next_floor_state <= floor3; 			
+			--if up_down is set to "go down" we want to go to floor1
+			elsif (up_down='0' and stop='0') then 
+				next_floor_state <= floor1;
+			--otherwise we're going to stay at floor2
+			else
+				next_floor_state <= floor2;
+			end if;
+		--when our current state is floor3
+		when floor3 =>
+			--if up_down is set to "go up" we want to go to floor4
+			if (up_down='1' and stop ='0') then 
+				next_floor_state <= floor4;
+			--if up_down is set to "go down" we want to go to floor2
+			elsif (up_down='0' and stop='0') then 
+				next_floor_state <= floor2;
+			--otherwise stay at floor3
+			else
+				next_floor_state <= floor3;
+			end if;
+		--when our current state is floor4
+		when floor4 =>
+			--if up_down is set to "go down" we want to go floor3
+			if (up_down='0' and stop='0') then 
+				next_floor_state <= floor3;
+			--otherwise remain at floor4
+			else 
+				next_floor_state <= floor4;	
+			end if;
+		
+		--This line accounts for phantom states
+		when others =>
+			next_floor_state <= floor1;
+	end case;
+end process;
+
+floor_state_machine: process(clk)
+begin
+	if(rising_edge(clk)) then
+		-- going to go back to floor 1
+		if reset='1' then
+				floor_state <= floor1;
+		else
+				floor_state <= next_floor_state;
 		end if;
+	end if;
 end process;
 
 -----------------------------------------------------------
 --Code your Ouput Logic for your Mealy machine below
 --Remember, now you have 2 outputs (floor and nextfloor)
 -----------------------------------------------------------
-floor <= nextFloor when (stop = '0');
-nextfloor <= "0001" when (floor_state = floor1) else
-				 "0010" when (floor_state = floor2) else
-				 "0011" when (floor_state = floor3) else
-				 "0100" when (floor_state = floor4) else
+floor <= "0001" when (floor_state = floor1) else
+			"0010" when (floor_state = floor2) else
+			"0011" when (floor_state = floor3) else
+			"0100" when (floor_state = floor4) else
+			"0001";
+
+nextfloor <= "0001" when (floor_state = floor1 and up_down='0') else
+				 "0010" when (floor_state = floor1 and up_down='1') else
+				 "0001" when (floor_state = floor2 and up_down='0') else
+				 "0011" when (floor_state = floor2 and up_down='1') else
+				 "0010" when (floor_state = floor3 and up_down='0') else
+				 "0100" when (floor_state = floor3 and up_down='1') else
+				 "0011" when (floor_state = floor4 and up_down='0') else
+				 "0100" when (floor_state = floor4 and up_down='1') else
 				 "0001";
 
 end Behavioral;
