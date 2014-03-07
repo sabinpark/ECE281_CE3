@@ -6,7 +6,6 @@
 -- Design Name:		CE3
 -- Module Name:    	MooreElevatorController_Shell - Behavioral 
 -- Description: 		Shell for completing CE3
---
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -48,9 +47,10 @@ begin
 floor_state_machine: process(clk)
 begin
 	--clk'event and clk='1' is VHDL-speak for a rising edge
-	if clk'event and clk='1' then
+	if rising_edge(clk) then  --EDIT: if clk'event and clk='1' then
 		--reset is active high and will return the elevator to floor1
 		--Question: is reset synchronous or asynchronous?
+		--Answer: synchronous b/c it is dependent on the clk
 		if reset='1' then
 			floor_state <= floor1;
 		--now we will code our next-state logic
@@ -58,8 +58,8 @@ begin
 			case floor_state is
 				--when our current state is floor1
 				when floor1 =>
-					--if up_down is set to "go up" and stop is set to 
-					--"don't stop" which floor do we want to go to?
+					--if up_down is set to "go up" and stop is set to "don't stop" which floor do we want to go to?
+					--Answer: we want to go to floor2
 					if (up_down='1' and stop='0') then 
 						--floor2 right?? This makes sense!
 						floor_state <= floor2;
@@ -76,6 +76,7 @@ begin
 					--if up_down is set to "go down" and stop is set to 
 					--"don't stop" which floor do we want to go to?
 					elsif (up_down='0' and stop='0') then 
+						--we want to go to floor1
 						floor_state <= floor1;
 					--otherwise we're going to stay at floor2
 					else
@@ -84,18 +85,23 @@ begin
 				
 --COMPLETE THE NEXT STATE LOGIC ASSIGNMENTS FOR FLOORS 3 AND 4
 				when floor3 =>
-					if (							) then 
-						floor_state <= 
-					elsif (						) then 
-						floor_state <= 	
+					--if up_down is set to "go up" and stop is set to "don't stop" we want to go to floor4
+					if (up_down='1' and stop ='0') then 
+						floor_state <= floor4;
+					--if up_down is set to "go down" and stop is set to "don't stop" we want to go to floor2
+					elsif (up_down='0' and stop='0') then 
+						floor_state <= floor2;
+					--otherwise stat at floor3
 					else
-						floor_state <= 	
+						floor_state <= floor3;
 					end if;
 				when floor4 =>
-					if (							) then 
-						floor_state <= 	
+					--if up_down is set to "go down" and stop is set to "don't stop", we want to go down to floor3
+					if (up_down='0' and stop='0') then 
+						floor_state <= floor3;
+					--otherwise remain at floor4
 					else 
-						floor_state <= 	
+						floor_state <= floor4;	
 					end if;
 				
 				--This line accounts for phantom states
@@ -107,10 +113,10 @@ begin
 end process;
 
 -- Here you define your output logic. Finish the statements below
-floor <= "0001" when (floor_state =       ) else
-			"0010" when (                    ) else
-			"0011" when (                    ) else
-			"0100" when (                    ) else
+floor <= "0001" when (floor_state = floor1) else
+			"0010" when (floor_state = floor2) else
+			"0011" when (floor_state = floor3) else
+			"0100" when (floor_state = floor4) else
 			"0001";
 
 end Behavioral;
