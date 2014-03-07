@@ -120,7 +120,7 @@ BEGIN
 		up_down <= '0';
 		stop <= '0';
 		
-		wait for clk_period/2;
+		wait for clk_period;
 		
 		assert (floor = "0011")
 				report "Floor 3 expected"
