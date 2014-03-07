@@ -72,8 +72,10 @@ BEGIN
    begin		
       -- hold reset state for 100 ns.
       --wait for 100 ns;	
-
-      wait for clk_period;
+		
+		report "Start of the simulation test";
+		
+      --wait for clk_period*2;
 
       -- insert stimulus here 
 		
@@ -81,7 +83,7 @@ BEGIN
 		reset <= '1';
 		wait for clk_period*2;
 		assert (floor = "0001")
-				report "Expected: floor 1"
+				report "Floor 1 expected"
 		severity error;
 		reset <= '0';
 		
@@ -92,7 +94,7 @@ BEGIN
 		wait for clk_period;
 		stop <= '1';
 		assert (floor = "0010")
-				report "Expected: floor 2"
+				report "Floor 2 expected"
 		severity error;
 		wait for clk_period*2;
 		
@@ -101,7 +103,7 @@ BEGIN
 		wait for clk_period;
 		stop <= '1';
 		assert (floor = "0011")
-				report "Expected: floor 3"
+				report "Floor 3 expected"
 		severity error;
 		wait for clk_period*2;
 		
@@ -110,13 +112,29 @@ BEGIN
 		wait for clk_period;
 		stop <= '1';
 		assert (floor = "0100")
-				report "Expected: floor 4"
+				report "Floor 4 expected"
 		severity error;
 		wait for clk_period*2;
 		
+		-- Go back down to Floor 1
 		up_down <= '0';
 		stop <= '0';
-		wait;
+		
+		wait for clk_period/2;
+		
+		assert (floor = "0011")
+				report "Floor 3 expected"
+		severity error;
+		wait for clk_period;
+		
+		assert (floor = "0010")
+				report "Floor 2 expected"
+		severity error;
+		wait for clk_period;
+		
+		assert (floor = "0001")
+				report "Floor 1 expected"
+		severity error;
 		
       wait;
    end process;
