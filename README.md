@@ -113,6 +113,29 @@ The testbench was also very similar to the MOORE testbench.  The biggest differe
 ### Simulation Results
 ![alt text](https://raw.github.com/sabinpark/ECE281_CE3/master/Mealy_Simulation_Results.PNG "Mealy Testbench Simulation Results")
 
+# Questions/Answers
+All of the questions were answered within the code.  However, I will add the questions and answers here as well.
+
+### Q1
+Q: is reset synchronous or asynchronous?
+
+A: synchronous because it is dependent on the clock
+
+### Q2
+Q: if up_down is set to "go up" and stop is set to "don't stop" which floor do we want to go to?
+
+A: if you're on floors 1, 2, or 3, then go one floor up; if you're on floor 4, remain on floor 4
+
+### Q3
+Q: if up_down is set to "go down" and stop is set to "don't stop" which floor do we want to go to?
+
+A: if you're on floors 2, 3, or 4, then go one floor down; if you're on floor 1, remain on floor 1
+
+### Q4
+Q: will the Mealy machine be different from the Moore machine?
+
+A: yes, because the mealy takes in both current state and current inputs, while the moore takes in current states only
+
 
 # Documentation:
 Testbench: Cadet Bodin pointed out that it would be simpler for now to check each floor value with the expected value manually instead of using a for loop.  He also helped me with the testbench by pointing out that nextfloor should be an *INOUT* instead of *OUT*.  This got rid of my errors and allowed the simulation to run successfully.
