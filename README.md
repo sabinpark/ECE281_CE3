@@ -75,3 +75,44 @@ I then added assert statements to turn the testbench into a self-checking testbe
 
 # Mealy Elevator Controller
 ## Mealy Shell
+For the Mealy, I realized that instead of having the current state alone drive the outputs, I had to have the current state and the current inputs drive the outputs.  I accomplished this by including an AND with the check for a rising edge.  Specifically, I made the MEALY shell sensitive to the signal *stop*.
+
+```vhdl
+	if reset='1' then
+		floor_state <= floor1;
+	end if;
+	
+	-- on the rising edge and not stopping
+	if rising_edge(clk) and stop='0' then  
+		case floor_state is
+			--when our current state is floor1	
+			when floor1 =>
+			
+			...  -- same as the code above
+```
+By checking the rising edge AND the value of stop, the program will change from being synchronous to asynchronous.  This is a characteristic of the mealy shell.  Also note that the first if statement checks for the value of *reset* even before checking for the rising edge.
+
+At the end, the output logic was also changed to account for the output, *nextFloor*.  *floor* would take in the value of *nextfloor* when the value of stop is 0, meaning that the elevator is moving.  Right after, *nextfloor* takes the value of the floor number depending on the signal, *floor_state*.
+
+```vhdl
+	floor <= nextFloor when (stop = '0');
+	nextfloor <= "0001" when (floor_state = floor1) else
+		"0010" when (floor_state = floor2) else
+		"0011" when (floor_state = floor3) else
+		"0100" when (floor_state = floor4) else
+		"0001";
+```
+
+One thing I had to accomodate was to make nextfloor into an *INOUT* instead of an *OUT* signal.  This was necessary because I set the value of *floor* to *nextfloor*, which was not possible with an *OUT*.
+
+Other than what was mentioned above, the code for the MEALY was very similar to the MOORE.
+
+## Mealy Testbench
+The testbench was also very similar to the MOORE testbench.  The biggest difference was that I had to account for the signal, *nextfloor*.  Again, since the code was essentially, the same, I was able to reuse the assert statements.  Fortunately, the console did not print out any errors.  This showed that the design funcioned as it was supposed to.  Furthermore, I doublechecked the results manually, and the results were correct.
+
+### Simulation Results
+![alt text](https://raw.github.com/sabinpark/ECE281_CE3/master/Mealy_Simulation_Results.PNG "Mealy Testbench Simulation Results")
+
+
+# Documentation:
+Testbench: Cadet Bodin pointed out that it would be simpler for now to check each floor value with the expected value manually instead of using a for loop.  He also helped me with the testbench by pointing out that nextfloor should be an *INOUT* instead of *OUT*.  This got rid of my errors and allowed the simulation to run successfully.
