@@ -42,8 +42,7 @@ architecture Behavioral of MealyElevatorController_Shell is
 
 type floor_state_type is (floor1, floor2, floor3, floor4);
 
--- added next_floor_state signal
-signal floor_state, next_floor_state : floor_state_type;
+signal floor_state : floor_state_type;
 
 begin
 
@@ -52,73 +51,59 @@ begin
 --Question: Will it be different from your Moore Machine?
 --Answer: Yes
 ---------------------------------------------------------
-next_state_machine: process(up_down, stop, floor_state)
+floor_state_machine: process(up_down, stop, clk)
 begin
 --Insert your state machine below:
 	-- this is gonna be asynchronous
-		
-	
-	case floor_state is
-		--when our current state is floor1
-		when floor1 =>
-			--if up_down is set to "go up" we want to go to floor2
-			if (up_down='1' and stop = '0') then 
-				next_floor_state <= floor2;
-			--otherwise we're going to stay at floor1
-			else
-				next_floor_state <= floor1;
-			end if;
-		--when our current state is floor2
-		when floor2 => 
-			--if up_down is set to "go up" we want to go to floor3
-			if (up_down='1' and stop='0') then 
-				next_floor_state <= floor3; 			
-			--if up_down is set to "go down" we want to go to floor1
-			elsif (up_down='0' and stop='0') then 
-				next_floor_state <= floor1;
-			--otherwise we're going to stay at floor2
-			else
-				next_floor_state <= floor2;
-			end if;
-		--when our current state is floor3
-		when floor3 =>
-			--if up_down is set to "go up" we want to go to floor4
-			if (up_down='1' and stop ='0') then 
-				next_floor_state <= floor4;
-			--if up_down is set to "go down" we want to go to floor2
-			elsif (up_down='0' and stop='0') then 
-				next_floor_state <= floor2;
-			--otherwise stay at floor3
-			else
-				next_floor_state <= floor3;
-			end if;
-		--when our current state is floor4
-		when floor4 =>
-			--if up_down is set to "go down" we want to go floor3
-			if (up_down='0' and stop='0') then 
-				next_floor_state <= floor3;
-			--otherwise remain at floor4
-			else 
-				next_floor_state <= floor4;	
-			end if;
-		
-		--This line accounts for phantom states
-		when others =>
-			next_floor_state <= floor1;
-	end case;
-end process;
-
-floor_state_machine: process(clk)
-begin
-	if(rising_edge(clk)) then
-		-- going to go back to floor 1
-		if reset='1' then
-				floor_state <= floor1;
+	if stop = '0' and rising_edge(clk) then
+		if reset = '1' then
+			floor_state <= floor1;
 		else
-				floor_state <= next_floor_state;
+			case floor_state is
+				when floor1 =>
+					if(up_down = '1') then
+						floor_state <= floor2;
+					else
+						floor_state <= floor1;
+					end if;
+				when floor2 =>
+					if(up_down = '1') then
+						floor_state <= floor3;
+					else
+						floor_state <= floor1;
+					end if;
+				when floor3 =>
+					if(up_down = '1') then
+						floor_state <= floor4;
+					else
+						floor_state <= floor2;
+					end if;
+				when floor4 =>
+					if(up_down = '1') then
+						floor_state <= floor4;
+					else
+						floor_state <= floor3;
+					end if;
+			end case;
+		end if;
+	elsif stop = '1' and rising_edge(clk) then
+		if reset = '1' then
+			floor_state <= floor1;
+		else
+			case floor_state is
+				when floor1 =>
+					floor_state <= floor1;
+				when floor2 =>
+					floor_state <= floor2;
+				when floor3 =>
+					floor_state <= floor3;
+				when floor4 =>
+					floor_state <= floor4;	
+			end case;
 		end if;
 	end if;
-end process;
+						
+end process;	
 
 -----------------------------------------------------------
 --Code your Ouput Logic for your Mealy machine below
@@ -129,16 +114,14 @@ floor <= "0001" when (floor_state = floor1) else
 			"0011" when (floor_state = floor3) else
 			"0100" when (floor_state = floor4) else
 			"0001";
-
-nextfloor <= "0001" when (floor_state = floor1 and up_down='0') else
-				 "0010" when (floor_state = floor1 and up_down='1') else
-				 "0001" when (floor_state = floor2 and up_down='0') else
-				 "0011" when (floor_state = floor2 and up_down='1') else
-				 "0010" when (floor_state = floor3 and up_down='0') else
-				 "0100" when (floor_state = floor3 and up_down='1') else
-				 "0011" when (floor_state = floor4 and up_down='0') else
-				 "0100" when (floor_state = floor4 and up_down='1') else
+nextfloor <= "0001" when (floor_state = floor1 and up_down = '0') else
+				 "0001" when (floor_state = floor2 and up_down = '0') else
+				 "0010" when (floor_state = floor1 and up_down = '1') else
+				 "0010" when (floor_state = floor3 and up_down = '0') else
+				 "0011" when (floor_state = floor2 and up_down = '1') else
+				 "0011" when (floor_state = floor4 and up_down = '0') else
+				 "0100" when (floor_state = floor3 and up_down = '1') else
+				 "0100" when (floor_state = floor4 and up_down = '1') else
 				 "0001";
 
 end Behavioral;
-

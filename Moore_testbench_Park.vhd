@@ -44,7 +44,7 @@ ARCHITECTURE behavior OF Moore_testbench_Park IS
 	--signal expected_floor : std_logic_vector(3 downto 0) := (others => '0');
 
    -- Clock period definitions
-   constant clk_period : time := 10 ns;
+   constant clk_period : time := 4 ns;
  
 BEGIN
  
@@ -111,13 +111,13 @@ BEGIN
 		stop <= '0';
 		wait for clk_period;
 		stop <= '1';
+		up_down <= '0';
 		assert (floor = "0100")
 				report "Floor 4 expected"
 		severity error;
 		wait for clk_period*2;
 		
 		-- Go back down to Floor 1
-		up_down <= '0';
 		stop <= '0';
 		
 		wait for clk_period;
