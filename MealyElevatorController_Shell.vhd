@@ -55,10 +55,10 @@ floor_state_machine: process(up_down, stop, clk)
 begin
 --Insert your state machine below:
 	-- this is gonna be asynchronous
-	if stop = '0' and rising_edge(clk) then
+	if rising_edge(clk) then
 		if reset = '1' then
 			floor_state <= floor1;
-		else
+		elsif stop = '0' then
 			case floor_state is
 				when floor1 =>
 					if(up_down = '1') then
@@ -85,11 +85,7 @@ begin
 						floor_state <= floor3;
 					end if;
 			end case;
-		end if;
-	elsif stop = '1' and rising_edge(clk) then
-		if reset = '1' then
-			floor_state <= floor1;
-		else
+		elsif stop = '1' then
 			case floor_state is
 				when floor1 =>
 					floor_state <= floor1;
