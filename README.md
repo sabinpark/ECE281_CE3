@@ -73,69 +73,40 @@ I then added assert statements to turn the testbench into a self-checking testbe
 ![alt text](https://raw.github.com/sabinpark/ECE281_CE3/master/Moore_Simulation_Results.PNG "Moore Testbench Simulation Results")
 
 
+
 # Mealy Elevator Controller
 ## Mealy Shell
-For the Mealy, I realized that instead of having the current state alone drive the outputs, I had to have the current state and the current inputs drive the outputs.  I accomplished this by including an AND with the check for a rising edge.  Specifically, I made the MEALY shell sensitive to the signal *stop*.
+
+*UPDATE*: I changed the mealy shell so that instead of having the rising_edge(clk) "AND-ed" together with a signal input, the code would test each statement separately, preventing potential errors for when I program the nexys2_shell.
+
+For the Mealy, I realized that instead of having the current state alone drive the outputs, I had to have the current state and the current inputs drive the outputs.  I accomplished this by adding *up_down* and *stop* to the sensitivity list.  
+
+The process, *floor_state_machine* was essentially kept the same; with differences only within the structure of the if statements.
+
+Below is the changed sensitivity list:
+```vhdl
+	floor_state_machine: process(up_down, stop, clk)
+```
+Since the sensitivity list contains the clock and other signal inputs as well, the program will change from being synchronous to asynchronous.
+
+At the end, the output logic was also changed to account for the output, *nextFloor*.  Depending on the value of *up_down*, *next_floor* would equal the floor right above or right below *floor*.  Of course, if the current floor is floor 1 and *up_down* is 0, then *next_floor* would be set to the bottom-most floor, floor 1.  Likewise, if the current floor is floor 4 and *up_down* is 1, then *next_floor* would be set to the top-most floor, floor 4. 
 
 ```vhdl
-	if reset='1' then
-		floor_state <= floor1;
-	end if;
-	
-	-- on the rising edge and not stopping
-	if rising_edge(clk) and stop='0' then  
-		case floor_state is
-			--when our current state is floor1	
-			when floor1 =>
-			
-			...  -- same as the code above
+	nextfloor <= "0001" when (floor_state = floor1 and up_down = '0') else
+		     "0001" when (floor_state = floor2 and up_down = '0') else
+		     "0010" when (floor_state = floor1 and up_down = '1') else
+		     "0010" when (floor_state = floor3 and up_down = '0') else
+		     "0011" when (floor_state = floor2 and up_down = '1') else
+		     "0011" when (floor_state = floor4 and up_down = '0') else
+		     "0100" when (floor_state = floor3 and up_down = '1') else
+	     	     "0100" when (floor_state = floor4 and up_down = '1') else
+		     "0001";
 ```
-By checking the rising edge AND the value of stop, the program will change from being synchronous to asynchronous.  This is a characteristic of the mealy shell.  Also note that the first if statement checks for the value of *reset* even before checking for the rising edge.
-
-At the end, the output logic was also changed to account for the output, *nextFloor*.  *floor* would take in the value of *nextfloor* when the value of stop is 0, meaning that the elevator is moving.  Right after, *nextfloor* takes the value of the floor number depending on the signal, *floor_state*.
-
-```vhdl
-	floor <= nextFloor when (stop = '0');
-	nextfloor <= "0001" when (floor_state = floor1) else
-		"0010" when (floor_state = floor2) else
-		"0011" when (floor_state = floor3) else
-		"0100" when (floor_state = floor4) else
-		"0001";
-```
-
-One thing I had to accomodate was to make nextfloor into an *INOUT* instead of an *OUT* signal.  This was necessary because I set the value of *floor* to *nextfloor*, which was not possible with an *OUT*.
 
 Other than what was mentioned above, the code for the MEALY was very similar to the MOORE.
 
-##*UPDATE*
-I changed the mealy shell in several ways.  First, I created another signal called *next_floor_state*, which would account for the next floor.
-
-The made the process *next_state_machine* to set the state of *next_floor_state* depending on the values of *up_down* and *stop*.  This takes care of the mealy characteristic of the inputs also driving the outputs.
-
-Then I updated the process *floor_state_machine* to only take care of reseting the floor to floor 1 when there is a rising edge.
-
-For the output logic, I kept *floor* the same as the moore.  For *nextfloor*, I set the logic so that *nextfloor* would be set to the appropriate floors depending on the the state, *floor*, and the input, *up_down*.
-
-```vhdl
-	floor <= "0001" when (floor_state = floor1) else
-		"0010" when (floor_state = floor2) else
-		"0011" when (floor_state = floor3) else
-		"0100" when (floor_state = floor4) else
-		"0001";
-	nextfloor <= "0001" when (floor_state = floor1 and up_down='0') else
-		 "0010" when (floor_state = floor1 and up_down='1') else
-		 "0001" when (floor_state = floor2 and up_down='0') else
-		 "0011" when (floor_state = floor2 and up_down='1') else
-		 "0010" when (floor_state = floor3 and up_down='0') else
-		 "0100" when (floor_state = floor3 and up_down='1') else
-		 "0011" when (floor_state = floor4 and up_down='0') else
-		 "0100" when (floor_state = floor4 and up_down='1') else
-		 "0001";
-```
-
-
 ## Mealy Testbench
-The testbench was also very similar to the MOORE testbench.  The biggest difference was that I had to account for the signal, *nextfloor*.  Again, since the code was essentially, the same, I was able to reuse the assert statements.  Fortunately, the console did not print out any errors.  This showed that the design funcioned as it was supposed to.  Furthermore, I doublechecked the results manually, and the results were correct.
+The testbench was also very similar to the MOORE testbench.  The biggest difference was that I had to account for the signal, *nextfloor*.  Again, since the code was essentially the same, I was able to reuse the assert statements.  Fortunately, the console did not print out any errors.  This showed that the design functioned as it was supposed to.  Furthermore, I doublechecked the results manually, and the results were correct.
 
 ### Update
 I changed the testbench to account for the next floor as well.
@@ -164,10 +135,10 @@ A: if you're on floors 2, 3, or 4, then go one floor down; if you're on floor 1,
 ### Q4
 Q: will the Mealy machine be different from the Moore machine?
 
-A: yes, because the mealy takes in both current state and current inputs, while the moore takes in current states only
+A: yes, because the mealy's output logic depends on both the current state and the current inputs., while the moore takes in only the current states
 
 
 # Documentation:
-Testbench: Cadet Bodin pointed out that it would be simpler for now to check each floor value with the expected value manually instead of using a for loop.  He also helped me with the testbench by pointing out that nextfloor should be an *INOUT* instead of *OUT*.  This got rid of my errors and allowed the simulation to run successfully.
+Testbench: Cadet Bodin pointed out that it would be simpler for now to check each floor value with the expected value manually instead of using a for loop.
 
-Mealy Shell:  Cadet Wooden helped me by pointing out that I needed another signal, *next_floor_state* to drive the state of the program as well.  He told me the usefulness of separating the mealy process into two different processes.
+Mealy Shell:  Cadet Wooden helped me by pointing out that I needed another signal, *next_floor_state* to drive the state of the program as well.  He told me the usefulness of separating the mealy process into two different processes.  *UPDATE* I ended up not using the *next_floor_state* signal.  
