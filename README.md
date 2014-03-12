@@ -89,18 +89,18 @@ Below is the changed sensitivity list:
 ```
 Since the sensitivity list contains the clock and other signal inputs as well, the program will change from being synchronous to asynchronous.
 
-At the end, the output logic was also changed to account for the output, *nextFloor*.  Depending on the value of *up_down*, *next_floor* would equal the floor right above or right below *floor*.  Of course, if the current floor is floor 1 and *up_down* is 0, then *next_floor* would be set to the bottom-most floor, floor 1.  Likewise, if the current floor is floor 4 and *up_down* is 1, then *next_floor* would be set to the top-most floor, floor 4. 
+At the end, the output logic was also changed to account for the output, *next_floor*.  Depending on the value of *up_down*, *next_floor* would equal the floor right above or right below *floor*.  Of course, if the current floor is floor 1 and *up_down* is 0, then *next_floor* would be set to the bottom-most floor, floor 1.  Likewise, if the current floor is floor 4 and *up_down* is 1, then *next_floor* would be set to the top-most floor, floor 4. 
 
 ```vhdl
-	nextfloor <= "0001" when (floor_state = floor1 and up_down = '0') else
-		     "0001" when (floor_state = floor2 and up_down = '0') else
-		     "0010" when (floor_state = floor1 and up_down = '1') else
-		     "0010" when (floor_state = floor3 and up_down = '0') else
-		     "0011" when (floor_state = floor2 and up_down = '1') else
-		     "0011" when (floor_state = floor4 and up_down = '0') else
-		     "0100" when (floor_state = floor3 and up_down = '1') else
-	     	     "0100" when (floor_state = floor4 and up_down = '1') else
-		     "0001";
+    nextfloor <= "0001" when (floor_state = floor1 and up_down = '0') else
+		 "0001" when (floor_state = floor2 and up_down = '0') else
+		 "0010" when (floor_state = floor1 and up_down = '1') else
+		 "0010" when (floor_state = floor3 and up_down = '0') else
+		 "0011" when (floor_state = floor2 and up_down = '1') else
+		 "0011" when (floor_state = floor4 and up_down = '0') else
+		 "0100" when (floor_state = floor3 and up_down = '1') else
+		 "0100" when (floor_state = floor4 and up_down = '1') else
+		 "0001";
 ```
 
 Other than what was mentioned above, the code for the MEALY was very similar to the MOORE.
@@ -138,7 +138,7 @@ Q: will the Mealy machine be different from the Moore machine?
 A: yes, because the mealy's output logic depends on both the current state and the current inputs., while the moore takes in only the current states
 
 
-# Documentation:
+# Documentation
 Testbench: Cadet Bodin pointed out that it would be simpler for now to check each floor value with the expected value manually instead of using a for loop.
 
 Mealy Shell:  Cadet Wooden helped me by pointing out that I needed another signal, *next_floor_state* to drive the state of the program as well.  He told me the usefulness of separating the mealy process into two different processes.  *UPDATE* I ended up not using the *next_floor_state* signal.  
